@@ -195,5 +195,5 @@ InclusionIt< T > next(InclusionIt<T> curr, BiTree< T >* pattern)
 template< class T >
 bool hasNext(InclusionIt<T> curr, BiTree< T >* pattern)
 {
-
+  return next(curr, pattern).incl.first;
 }

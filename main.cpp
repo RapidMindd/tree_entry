@@ -23,9 +23,12 @@ int main()
   pattern_root = {2, &one, nullptr, nullptr};
   one = {1, nullptr, nullptr, &pattern_root};
 
-  auto first_entry = begin(&lhs_root, &pattern_root);
-  std::cout << first_entry.incl.first->val << " " << first_entry.incl.second->val << "\n";
-  auto next_entry = next(first_entry, &pattern_root);
-  std::cout << next_entry.incl.first->val << " " << next_entry.incl.second->val << "\n";
-
+  auto curr_entry = begin(&lhs_root, &pattern_root);
+  std::cout << curr_entry.incl.first->val << " " << curr_entry.incl.second->val << "\n";
+  while(hasNext(curr_entry, &pattern_root))
+  {
+    auto next_entry = next(curr_entry, &pattern_root);
+    std::cout << next_entry.incl.first->val << " " << next_entry.incl.second->val << "\n";
+    curr_entry = next_entry;
+  }
 }
