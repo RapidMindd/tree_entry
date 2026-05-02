@@ -1,3 +1,5 @@
+#include <cstddef>
+#include <tuple>
 #include <utility>
 
 template< class T >
@@ -96,41 +98,13 @@ bool isEqualStruct(BiTree< T >* lhs, BiTree< T >* rhs)
 }
 
 template< class T >
-std::pair< BiTree<T>*, BiTree<T>* > // <- диапазон из lhs
- inclusion(
-  BiTree<T>* lhs, // здесь ищем вхождения
-  BiTree<T>* pattern // образец структуры
-)
-{
-  BiTree< T >* lhs_curr = fall_left(lhs).second;
-  while (lhs_curr) {
-    auto result = isEqualStructStart(lhs_curr, fallLeft(pattern).second);
-    if (!std::get< 1 >(result) && std::get< 2 >(result)) {
-      BiTree< T >* last_lhs_next = std::get< 0 >(result);
-      if (!last_lhs_next) {
-        // lhs тоже закончился, нам нужен последний элемент
-        BiTree< T >* lhs_end = lhs;
-        while (lhs_end->rt) {
-          lhs_end = lhs_end->rt;
-        }
-        return {lhs_curr, lhs_end};
-      }
-      BiTree< T >* lhs_end = prev(last_lhs_next);
-      return {lhs_curr, lhs_end};
-    }
-    lhs_curr = nextStruct(lhs_curr).second;
-  }
-  return false;
-}
-
-template< class T >
 BiTree< T >* prev(BiTree< T >* curr)
 {
   BiTree< T >* next = curr;
   if (next->lt) {
     next = next->lt;
     while (next->rt) {
-      next = next->tr;
+      next = next->rt;
     }
   } else {
     BiTree< T >* parent = next->parent;
@@ -143,6 +117,34 @@ BiTree< T >* prev(BiTree< T >* curr)
   return next;
 }
 
+template< class T >
+std::pair< std::pair< BiTree<T>*, BiTree<T>* >, bool > // <- диапазон из lhs
+ inclusion(
+  BiTree<T>* lhs, // здесь ищем вхождения
+  BiTree<T>* pattern // образец структуры
+)
+{
+  BiTree< T >* lhs_curr = fallLeft(lhs).second;
+  while (lhs_curr) {
+    auto result = isEqualStructStart(lhs_curr, fallLeft(pattern).second);
+    if (!std::get< 1 >(result) && std::get< 2 >(result)) {
+      BiTree< T >* last_lhs_next = std::get< 0 >(result);
+      if (!last_lhs_next) {
+        // lhs тоже закончился, нам нужен последний элемент
+        BiTree< T >* lhs_end = lhs;
+        while (lhs_end->rt) {
+          lhs_end = lhs_end->rt;
+        }
+        return {{lhs_curr, lhs_end}, true};
+      }
+      BiTree< T >* lhs_end = prev(last_lhs_next);
+      return {{lhs_curr, lhs_end}, true};
+    }
+    lhs_curr = std::get< 2 >(nextStruct(lhs_curr));
+  }
+  return {{nullptr, nullptr}, false};
+}
+
 template< class T > struct InclusionIt {
   std::pair< BiTree<T>*, BiTree<T>* > incl;
 };
@@ -150,7 +152,9 @@ template< class T > struct InclusionIt {
 template< class T >
 InclusionIt<T> begin(BiTree<T>* lhs, BiTree<T>* pattern)
 {
-
+  BiTree< T >* pattern_begin = pattern ? fallLeft(pattern).second : nullptr;
+  // auto tmp = inclusion(lhs, pattern_begin);
+  return InclusionIt< T >{inclusion(lhs, pattern_begin).first};
 }
 
 template< class T >
