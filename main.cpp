@@ -23,6 +23,9 @@ int main()
   pattern_root = {2, &one, nullptr, nullptr};
   one = {1, nullptr, nullptr, &pattern_root};
 
-  auto first_entry = begin< int >(&lhs_root, &pattern_root);
+  auto first_entry = begin(&lhs_root, &pattern_root);
   std::cout << first_entry.incl.first->val << " " << first_entry.incl.second->val << "\n";
+  auto next_entry = next(first_entry, &pattern_root);
+  std::cout << next_entry.incl.first->val << " " << next_entry.incl.second->val << "\n";
+
 }
